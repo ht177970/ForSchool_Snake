@@ -3,7 +3,7 @@
 #include <cstring>
 
 namespace rg {
-	Game::Game(int outgame_size, int ingame_width, int ingame_height, int snake_size, int game_speed) {
+	Game::Game(int outgame_size, int ingame_width, int ingame_height, int snake_size, float game_speed) {
 		this->m_outgame_size = outgame_size;
 		this->m_ingame_width = ingame_width;
 		this->m_ingame_height = ingame_height;
@@ -57,7 +57,7 @@ namespace rg {
 		/*sf::Clock gameClock;
 		float elapsedGameTime = 0.0f;
 		float timeStep = 0.1f;*/
-		window.draw(m_game_food->getDrawable());
+		m_game_food->draw(window);
 		this->drawWall();
 		if (m_game_snake->wait_start(window))
 			GameLoop();
@@ -89,23 +89,7 @@ namespace rg {
 				}
 			}
 			if (!pause) {
-				bool moved = false;
-				if (!moved && sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-					m_game_snake->setDirection(Snake::Ways::UP);
-					moved = true;
-				}
-				if (!moved && sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-					m_game_snake->setDirection(Snake::Ways::DOWN);
-					moved = true;
-				}
-				if (!moved && sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-					m_game_snake->setDirection(Snake::Ways::R);
-					moved = true;
-				}
-				if (!moved && sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-					m_game_snake->setDirection(Snake::Ways::L);
-					moved = true;
-				}
+				m_game_snake->detectWayKeys();
 
 				elapsedGameTime += gameClock.restart().asSeconds();
 				if (elapsedGameTime > timeStep)

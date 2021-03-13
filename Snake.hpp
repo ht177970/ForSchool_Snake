@@ -6,9 +6,6 @@
 
 namespace rg {
 
-	const sf::Color Head_Color = sf::Color::Cyan;
-	const sf::Color Body_Color = sf::Color::White;
-
 	class Unit : BaseDrawable{
 	public:
 		explicit Unit(Unit* previous_unit, int X, int Y, int size);
@@ -22,16 +19,7 @@ namespace rg {
 		Unit* u1;
 		explicit Unit(Unit* previous_unit, int X, int Y);
 	private:
-		sf::CircleShape grap;
-	};
-
-	class HeadUnit : public Unit {
-	public:
-		explicit HeadUnit(Unit* previous_unit, int X, int Y, int size);
-		void draw(sf::RenderWindow& window) override;
-		void setPos(Pos pos) override;
-	private:
-		sf::RectangleShape m_grap;
+		sf::RectangleShape grap;
 	};
 
 	class Snake : BaseDrawable{
@@ -42,10 +30,9 @@ namespace rg {
 		bool move();
 		int getHeadX() { return x; };
 		int getHeadY() { return y; };
-		void setDirection(Ways way);
 		void draw(sf::RenderWindow& window) override;
-		void add();//debuging
 		void gainFood();
+		bool detectWayKeys();
 		bool posInBody(int x, int y) { return posInBody({ x,y }); }
 		bool posInBody(Pos position);
 		bool wait_start(sf::RenderWindow& window);
@@ -54,12 +41,27 @@ namespace rg {
 		int size;
 		int m_tail_x, m_tail_y;
 		int* m_outgame_size, * m_ingame_width, * m_ingame_height;
-		Ways now_direction;
+		Ways now_direction, last_move_direction;
 		Unit* head;
 		Unit* tail;
 		int getTailX_prev() { return m_tail_x; }
 		int getTailY_prev() { return m_tail_y; }
 		bool illegalPos();
+		void setDirection(Ways way);
+	};
+
+	class HeadUnit : public Unit {
+	public:
+		explicit HeadUnit(Unit* previous_unit, int X, int Y, int size);
+		void draw(sf::RenderWindow& window) override;
+		void setPos(Pos pos) override;
+		void onWayChanged(Snake::Ways new_direction);
+	private:
+		int m_size;
+		int c_adjust_x, c_adjust_y;
+		bool first_draw;
+		sf::RectangleShape m_grap_rect;
+		sf::CircleShape m_grap_circle;
 	};
 }
 

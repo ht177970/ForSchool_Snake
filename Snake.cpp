@@ -6,8 +6,9 @@ namespace rg {
 #pragma region Unit functions
 
 	Unit::Unit(Unit* previous_unit, int X, int Y, int size) : Unit(previous_unit, X, Y) {
-		grap.setRadius(size / 2);
-		grap.setFillColor(sf::Color::Blue);
+		//grap.setRadius(size / 2);
+		grap.setSize(sf::Vector2f(size, size));
+		grap.setFillColor(sf::Color::Cyan);
 	}
 
 	Unit::Unit(Unit* previous_unit, int X, int Y) {
@@ -28,18 +29,57 @@ namespace rg {
 	HeadUnit::HeadUnit(Unit* previous_unit, int X, int Y, int size) : Unit(previous_unit, X, Y) {
 		u1 = previous_unit;
 		this->setPos({ X, Y });
-		m_grap.setSize(sf::Vector2f(size, size));
-		m_grap.setFillColor(sf::Color::Cyan);
+		m_size = size;
+		c_adjust_x = 0;
+		c_adjust_y = 0;
+		m_grap_rect.setSize(sf::Vector2f(m_size, m_size /2));
+		m_grap_rect.setFillColor(sf::Color::Color(0, 139, 139));
+		m_grap_circle.setRadius(m_size / 2);
+		m_grap_circle.setFillColor(sf::Color::Color(0, 139, 139));
+		first_draw = true;
 	}
 
 	void HeadUnit::draw(sf::RenderWindow& window) {
-		window.draw(m_grap);
+		if (!first_draw)
+			window.draw(m_grap_rect);
+		else
+			first_draw = false;
+		window.draw(m_grap_circle);
 	}
 
 	void HeadUnit::setPos(Pos pos) {
 		x = pos.x;
 		y = pos.y;
-		m_grap.setPosition(x, y);
+		m_grap_rect.setPosition(x + c_adjust_x, y + c_adjust_y);
+		m_grap_circle.setPosition(x, y);
+	}
+
+	void HeadUnit::onWayChanged(Snake::Ways new_direction) {
+		switch (new_direction)
+		{
+		case Snake::Ways::UP:
+			m_grap_rect.setSize(sf::Vector2f(m_size, m_size / 2));
+			c_adjust_x = 0;
+			c_adjust_y = m_size / 2;
+			break;
+		case Snake::Ways::DOWN:
+			m_grap_rect.setSize(sf::Vector2f(m_size, m_size / 2));
+			c_adjust_x = 0;
+			c_adjust_y = 0;
+			break;
+		case Snake::Ways::R:
+			m_grap_rect.setSize(sf::Vector2f(m_size / 2, m_size));
+			c_adjust_x = 0;
+			c_adjust_y = 0;
+			break;
+		case Snake::Ways::L:
+			m_grap_rect.setSize(sf::Vector2f(m_size / 2, m_size));
+			c_adjust_x = m_size / 2;
+			c_adjust_y = 0;
+			break;
+		default:
+			break;
+		}
 	}
 
 	/*Unit* Unit::next() {
@@ -59,11 +99,32 @@ namespace rg {
 		head = new HeadUnit(nullptr, x, y, size);//head's prev is nullptr
 		tail = head;
 		now_direction = Ways::Non;
+		last_move_direction = Ways::Non;
 	}
 
 	void Snake::setDirection(Ways new_direction) {
-		if(static_cast<int>(new_direction) + static_cast<int>(now_direction))
+		if (static_cast<int>(new_direction) + static_cast<int>(last_move_direction))
 			now_direction = new_direction;
+	}
+
+	bool Snake::detectWayKeys() {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+			this->setDirection(Snake::Ways::UP);
+			return true;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+			this->setDirection(Snake::Ways::DOWN);
+			return true;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+			this->setDirection(Snake::Ways::R);
+			return true;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+			this->setDirection(Snake::Ways::L);
+			return true;
+		}
+		return false;
 	}
 
 	bool Snake::move() {
@@ -81,6 +142,9 @@ namespace rg {
 			x += size;
 			break;
 		}
+		if (now_direction != last_move_direction)
+			dynamic_cast<HeadUnit*>(head)->onWayChanged(now_direction);
+		last_move_direction = now_direction;
 		if (illegalPos())//edit later
 			return false;
 		Unit* moving = tail;
@@ -92,9 +156,7 @@ namespace rg {
 			moving = moving->prev();
 		}
 		head->setPos({ x, y });
-		if (this->posInBody({ x,y }))
-			return false;
-		return true;
+		return !this->posInBody({ x,y });
 	}
 
 	bool Snake::illegalPos() {
@@ -125,22 +187,8 @@ namespace rg {
 					window.close();
 					return false;
 				}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-				this->setDirection(Snake::Ways::UP);
+			if (this->detectWayKeys())
 				return true;
-			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-				this->setDirection(Snake::Ways::DOWN);
-				return true;
-			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-				this->setDirection(Snake::Ways::R);
-				return true;
-			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-				this->setDirection(Snake::Ways::L);
-				return true;
-			}
 		}
 		return false;
 	}
@@ -152,10 +200,6 @@ namespace rg {
 			drawing = drawing->prev();
 		}
 		head->draw(window);
-	}
-
-	void Snake::add() {//Debug
-		tail = new Unit(tail, tail->getPos().x, tail->getPos().y - size, size);
 	}
 
 	void Snake::gainFood() {
