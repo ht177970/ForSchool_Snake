@@ -2,7 +2,8 @@
 #include "Game.hpp"
 
 int main() {
-	rg::Game g(100, 800, 600, 20, 0.001f);
+	sf::RenderWindow w;
+	rg::Game g(w, { 100, 800, 600, 20 }, 0.001f);
 	g.StartGame();
 	std::cout << g.getScore() << " scores you got.\n";
 	system("pause");

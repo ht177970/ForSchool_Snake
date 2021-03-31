@@ -1,7 +1,7 @@
 #ifndef SNAKE_RG_SNAKE_H_
 #define SNAKE_RG_SNAKE_H_
 
-#include "Base.h"
+#include "Base.hpp"
 #include <SFML/Graphics.hpp>
 
 namespace rg {
@@ -10,19 +10,21 @@ namespace rg {
 	public:
 		explicit Unit(Unit* previous_unit, int X, int Y, int size);
 		~Unit();
+		void setNext(Unit* next_unit);
 		void draw(sf::RenderWindow& window) override;
 		virtual void setPos(Pos pos);
 		Unit* prev() { return u1; }
+		Unit* next() { return u2; }
 		Pos getPos() { return { x,y }; }
 	protected:
 		int x, y;
-		Unit* u1;
+		Unit* u1, * u2;
 		explicit Unit(Unit* previous_unit, int X, int Y);
 	private:
 		sf::RectangleShape grap;
 	};
 
-	class Snake : BaseDrawable{
+	class Snake : public BaseDrawable{
 	public:
 		enum class Ways { UP = 1, DOWN = -1, R = 2, L = -2, Non = 0};//R = Right, L = Left
 		explicit Snake(int* outgame_size, int* ingame_width, int* ingame_height, int SIZE);
@@ -36,6 +38,7 @@ namespace rg {
 		bool posInBody(int x, int y) { return posInBody({ x,y }); }
 		bool posInBody(Pos position);
 		bool wait_start(sf::RenderWindow& window);
+		bool gameover_delete_tail();
 	private:
 		int x, y;
 		int size;

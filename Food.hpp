@@ -1,17 +1,20 @@
 #ifndef SNAKE_RG_FOOD_H_
 #define SNAKE_RG_FOOD_H_
 
-#include "Base.h"
+#include "Base.hpp"
 #include <SFML/Graphics.hpp>
 
 namespace rg {
-	class Food : BaseDrawable {
+	class Food : public BaseDrawable {
 	private:
 		int x, y;
+		int outgame_size, game_width, game_height, size;
 		sf::RectangleShape grap;
-		Food(int X, int Y, int size);
+		//Food(int X, int Y, int size);
 	public:
-		static Food* generateFood(int outgame_size, int game_width, int game_height, int size);
+		//static Food* generateFood(int outgame_size, int game_width, int game_height, int size);
+		Food(int outgame_size, int game_width, int game_height, int size);
+		void generateNewPosition();
 		int getX();
 		int getY();
 		//sf::RectangleShape getDrawable();

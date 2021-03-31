@@ -2,7 +2,7 @@
 #include <random>
 
 namespace rg {
-	Food* Food::generateFood(int outgame_size, int game_width, int game_height, int size) {
+	/*Food* Food::generateFood(int outgame_size, int game_width, int game_height, int size) {
 		std::random_device random;
 		std::mt19937 generator(random());
 		int x = generator() % (game_width/size);//+1-1相抵
@@ -13,6 +13,24 @@ namespace rg {
 	Food::Food(int X, int Y, int size) {
 		x = X;
 		y = Y;
+		grap.setPosition(x, y);
+		grap.setSize(sf::Vector2f(size, size));
+		grap.setFillColor(sf::Color::Yellow);
+	}*/
+
+	Food::Food(int outgame_size, int game_width, int game_height, int size) {
+		this->outgame_size = outgame_size;
+		this->game_width = game_width;
+		this->game_height = game_height;
+		this->size = size;
+		this->generateNewPosition();
+	}
+
+	void Food::generateNewPosition() {
+		std::random_device random;
+		std::mt19937 generator(random());
+		this->x = outgame_size + (generator() % (game_width / size)) * size;//+1-1相抵
+		this->y = outgame_size + (generator() % (game_height / size)) * size;//同上
 		grap.setPosition(x, y);
 		grap.setSize(sf::Vector2f(size, size));
 		grap.setFillColor(sf::Color::Yellow);

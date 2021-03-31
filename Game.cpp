@@ -3,20 +3,15 @@
 #include <cstring>
 
 namespace rg {
-	Game::Game(int outgame_size, int ingame_width, int ingame_height, int snake_size, float game_speed) {
-		this->m_outgame_size = outgame_size;
-		this->m_ingame_width = ingame_width;
-		this->m_ingame_height = ingame_height;
-		this->m_snake_size = snake_size;
-		this->m_game_speed = game_speed;
-		window.create(sf::VideoMode(2 * m_outgame_size + m_ingame_width, 2 * m_outgame_size + m_ingame_height), "Snake Game");
-		score = 0;
-		Snake* game_snake = new Snake(&m_outgame_size, &m_ingame_width, &m_ingame_height, m_snake_size);
-		this->m_game_snake = game_snake;
-		this->genFood();
+
+	Wall::Wall(BaseData data) {
+		this->m_outgame_size = data.outgame_size;
+		this->m_ingame_width = data.ingame_width;
+		this->m_ingame_height = data.ingame_height;
+		this->m_snake_size = data.snake_size;
 	}
 
-	void Game::drawWall() {
+	void Wall::draw(sf::RenderWindow& window) {
 		int col = m_ingame_width / m_snake_size;
 		int row = m_ingame_height / m_snake_size;
 		/*for (int i = 0; i <= row; i++) {
@@ -53,13 +48,30 @@ namespace rg {
 		}
 	}
 
+
+	Game::Game(sf::RenderWindow& _window, BaseData data, float game_speed) :
+		m_renderManager(window), m_wall(data) {
+		this->m_outgame_size = data.outgame_size;
+		this->m_ingame_width = data.ingame_width;
+		this->m_ingame_height = data.ingame_height;
+		this->m_snake_size = data.snake_size;
+		this->m_game_speed = game_speed;
+
+		window.create(sf::VideoMode(2 * m_outgame_size + m_ingame_width, 2 * m_outgame_size + m_ingame_height), "Snake Game",
+			sf::Style::Close | sf::Style::Titlebar);
+		score = 0;
+
+		this->m_game_snake = new Snake(&m_outgame_size, &m_ingame_width, &m_ingame_height, m_snake_size);
+		this->m_game_food = new Food(m_outgame_size, m_ingame_width, m_ingame_height, m_snake_size);
+
+		this->m_renderManager.addGraphics(&this->m_wall);
+		this->m_renderManager.addGraphics(this->m_game_food);
+		this->m_renderManager.addGraphics(this->m_game_snake);
+		this->m_renderManager.setSanke(m_game_snake);
+	}
+
 	void Game::StartGame() {
-		/*sf::Clock gameClock;
-		float elapsedGameTime = 0.0f;
-		float timeStep = 0.1f;*/
-		m_game_food->draw(window);
-		this->drawWall();
-		if (m_game_snake->wait_start(window))
+		if(m_renderManager.startGame())
 			GameLoop();
 		else
 			this->~Game();
@@ -76,13 +88,15 @@ namespace rg {
 				{
 				case sf::Event::Closed:
 					window.close();
-					break;
+					return;
 				case sf::Event::KeyPressed:
 					if (e.key.code == sf::Keyboard::P) {//edit later
 						if (!pause)
 							elapsedGameTime += gameClock.restart().asSeconds();
 						pause = !pause;
 					}
+					if (e.key.code == sf::Keyboard::A)
+						m_game_snake->gainFood();
 					break;
 				default:
 					break;
@@ -104,11 +118,7 @@ namespace rg {
 						timeStep -= m_game_speed;
 					}
 				}
-				window.clear();
-				this->drawWall();
-				m_game_food->draw(window);
-				m_game_snake->draw(window);
-				window.display();
+				m_renderManager.Render();
 			}
 			else
 				gameClock.restart();
@@ -126,16 +136,58 @@ namespace rg {
 	}
 
 	void Game::genFood() {
-		m_game_food = Food::generateFood(m_outgame_size, m_ingame_width, m_ingame_height, m_snake_size);
-		while (m_game_snake->posInBody(m_game_food->getX(), m_game_food->getY()))
-			m_game_food = Food::generateFood(m_outgame_size, m_ingame_width, m_ingame_height, m_snake_size);
+		do {
+			m_game_food->generateNewPosition();
+		} while (m_game_snake->posInBody(m_game_food->getX(), m_game_food->getY()));
 	}
 	
 	void Game::GameOver() {
-		window.clear();
-		m_game_food->draw(window);
-		m_game_snake->draw(window);
-		window.display();
+		sf::Clock gameClock;
+		int _times = 0;
+		bool show = false; 
+		float time = 0.0f;
+		float flashing_interval = 0.2f;
+		float delete_interval = 0.1f;
+		sf::Event e;
+		while (window.isOpen()) {
+			while (window.pollEvent(e))
+				if (e.type == sf::Event::Closed) {
+					window.close();
+					return;
+				}
+			time += gameClock.restart().asSeconds();
+			if (_times < 5){
+				if (time > flashing_interval) {
+					time = 0.0f;
+					show = !show;
+					_times++;
+				}
+			}
+			else if (time > delete_interval){
+				time = 0.0f;
+				if (!m_game_snake->gameover_delete_tail())
+					break;
+			}
+			m_renderManager.endGameRender(show);
+		}
+		this->GameOver_2();
+	}
+
+	void Game::GameOver_2() {
+		sf::Event e;
+		sf::Clock clock;
+		float time_passed = 0.0f;
+		while (window.isOpen()) {
+			while (window.pollEvent(e))
+				if (e.type == sf::Event::Closed) {
+					window.close();
+					return;
+				}
+			time_passed += clock.restart().asSeconds();
+			if (time_passed > 2.0f)
+				return;
+			m_renderManager.endGameRender(false);
+		}
 	}
 
 	int Game::getScore() {

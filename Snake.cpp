@@ -26,6 +26,10 @@ namespace rg {
 		grap.setPosition(x, y);
 	}
 
+	void Unit::setNext(Unit* next_unit) {
+		u2 = next_unit;
+	}
+
 	HeadUnit::HeadUnit(Unit* previous_unit, int X, int Y, int size) : Unit(previous_unit, X, Y) {
 		u1 = previous_unit;
 		this->setPos({ X, Y });
@@ -174,12 +178,6 @@ namespace rg {
 	}
 
 	bool Snake::wait_start(sf::RenderWindow& window) {
-		if (window.isOpen()) {
-			this->draw(window);
-			window.display();
-		}
-		else
-			return false;
 		sf::Event e;
 		while (window.isOpen()) {
 			while (window.pollEvent(e))
@@ -203,7 +201,16 @@ namespace rg {
 	}
 
 	void Snake::gainFood() {
+		Unit* prev_tail = tail;
 		tail = new Unit(tail, this->getTailX_prev(), this->getTailY_prev(), size);
+		prev_tail->setNext(tail);
+	}
+
+	bool Snake::gameover_delete_tail() {
+		Unit* new_tail = tail->prev();
+		delete tail;
+		tail = new_tail;
+		return tail;
 	}
 
 	Unit::~Unit() {
