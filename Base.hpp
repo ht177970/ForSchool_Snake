@@ -24,7 +24,7 @@ namespace rg {
 			this->ingame_height = ingame_height;
 			this->snake_size = snake_size;
 		}
-	}
+	};
 }
 
 #endif

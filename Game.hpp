@@ -20,8 +20,8 @@ namespace rg {
 
 	class Game {
 	private:
-		sf::RenderWindow window;
-		renderManager m_renderManager;
+		sf::RenderWindow* window;
+		renderManager* m_renderManager;
 		Snake* m_game_snake;
 		Food* m_game_food;
 		Wall m_wall;
@@ -36,7 +36,7 @@ namespace rg {
 		void AteFood();
 		void genFood();
 	public:
-		explicit Game(sf::RenderWindow& window, BaseData data, float game_speed);
+		explicit Game(sf::RenderWindow& window, renderManager& render, BaseData data, float game_speed);
 		~Game() = default;
 		void StartGame();
 		int getScore();

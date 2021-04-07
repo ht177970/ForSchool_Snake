@@ -20,7 +20,7 @@ namespace rg {
 				sf::Vertex(sf::Vector2f(m_outgame_size, m_outgame_size + m_snake_size * i)),
 				sf::Vertex(sf::Vector2f(m_outgame_size + m_ingame_width, m_outgame_size + m_snake_size * i))
 			};
-			window.draw(line, 2, sf::Lines);
+			window->draw(line, 2, sf::Lines);
 		}
 		for (int i = 0; i <= col; i++) {
 			sf::Vertex line[] =
@@ -28,7 +28,7 @@ namespace rg {
 				sf::Vertex(sf::Vector2f(m_outgame_size + m_snake_size * i, m_outgame_size)),
 				sf::Vertex(sf::Vector2f(m_outgame_size + m_snake_size * i, m_outgame_size + m_ingame_height))
 			};
-			window.draw(line, 2, sf::Lines);
+			window->draw(line, 2, sf::Lines);
 		}*/
 		for (int i : {0, col}) {
 			sf::Vertex line[] =
@@ -49,29 +49,34 @@ namespace rg {
 	}
 
 
-	Game::Game(sf::RenderWindow& _window, BaseData data, float game_speed) :
-		m_renderManager(window), m_wall(data) {
+	Game::Game(sf::RenderWindow& _window, renderManager& render, BaseData data, float game_speed) :
+		/*m_renderManager(window),*/ m_wall(data) {
+		this->window = &_window;
+		this->m_renderManager = &render;
 		this->m_outgame_size = data.outgame_size;
 		this->m_ingame_width = data.ingame_width;
 		this->m_ingame_height = data.ingame_height;
 		this->m_snake_size = data.snake_size;
 		this->m_game_speed = game_speed;
+		this->score = 0;
 
-		window.create(sf::VideoMode(2 * m_outgame_size + m_ingame_width, 2 * m_outgame_size + m_ingame_height), "Snake Game",
-			sf::Style::Close | sf::Style::Titlebar);
-		score = 0;
+		int width = m_outgame_size * 2 + m_ingame_width, height = m_outgame_size * 2 + m_ingame_height;
+		this->window->setSize(sf::Vector2u(width, height));
+		this->window->setView(sf::View(sf::FloatRect(0, 0, width, height)));
+		this->window->setTitle("Snake Game");
 
 		this->m_game_snake = new Snake(&m_outgame_size, &m_ingame_width, &m_ingame_height, m_snake_size);
 		this->m_game_food = new Food(m_outgame_size, m_ingame_width, m_ingame_height, m_snake_size);
 
-		this->m_renderManager.addGraphics(&this->m_wall);
-		this->m_renderManager.addGraphics(this->m_game_food);
-		this->m_renderManager.addGraphics(this->m_game_snake);
-		this->m_renderManager.setSanke(m_game_snake);
+		this->m_renderManager->clearAllGraphics();
+		this->m_renderManager->addGraphics(&this->m_wall);
+		this->m_renderManager->addGraphics(this->m_game_food);
+		this->m_renderManager->addGraphics(this->m_game_snake);
+		this->m_renderManager->setSanke(m_game_snake);
 	}
 
 	void Game::StartGame() {
-		if(m_renderManager.startGame())
+		if(m_renderManager->startGame())
 			GameLoop();
 		else
 			this->~Game();
@@ -82,12 +87,12 @@ namespace rg {
 		float elapsedGameTime = 0.0f;
 		float timeStep = 0.1f;
 		sf::Event e;
-		while (window.isOpen()) {
-			while (window.pollEvent(e)) {
+		while (window->isOpen()) {
+			while (window->pollEvent(e)) {
 				switch (e.type)
 				{
 				case sf::Event::Closed:
-					window.close();
+					window->close();
 					return;
 				case sf::Event::KeyPressed:
 					if (e.key.code == sf::Keyboard::P) {//edit later
@@ -118,7 +123,7 @@ namespace rg {
 						timeStep -= m_game_speed;
 					}
 				}
-				m_renderManager.Render();
+				m_renderManager->Render();
 			}
 			else
 				gameClock.restart();
@@ -149,10 +154,10 @@ namespace rg {
 		float flashing_interval = 0.2f;
 		float delete_interval = 0.1f;
 		sf::Event e;
-		while (window.isOpen()) {
-			while (window.pollEvent(e))
+		while (window->isOpen()) {
+			while (window->pollEvent(e))
 				if (e.type == sf::Event::Closed) {
-					window.close();
+					window->close();
 					return;
 				}
 			time += gameClock.restart().asSeconds();
@@ -168,7 +173,7 @@ namespace rg {
 				if (!m_game_snake->gameover_delete_tail())
 					break;
 			}
-			m_renderManager.endGameRender(show);
+			m_renderManager->endGameRender(show);
 		}
 		this->GameOver_2();
 	}
@@ -177,16 +182,16 @@ namespace rg {
 		sf::Event e;
 		sf::Clock clock;
 		float time_passed = 0.0f;
-		while (window.isOpen()) {
-			while (window.pollEvent(e))
+		while (window->isOpen()) {
+			while (window->pollEvent(e))
 				if (e.type == sf::Event::Closed) {
-					window.close();
+					window->close();
 					return;
 				}
 			time_passed += clock.restart().asSeconds();
 			if (time_passed > 2.0f)
 				return;
-			m_renderManager.endGameRender(false);
+			m_renderManager->endGameRender(false);
 		}
 	}
 
