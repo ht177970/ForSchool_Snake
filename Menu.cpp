@@ -20,7 +20,7 @@ namespace rg {
 			m_renderManager->addGraphics(t);
 		m_text_index = 0;
 
-		m_renderManager->addGraphics(new Image("snake.png", 300, 200, 0.85f, 0.85f));
+		m_renderManager->addGraphics(new Image(ImageBuilder("snake.png", 300, 200, 0.85f, 0.85f)));
 		
 		loop();
 	}
@@ -93,12 +93,12 @@ namespace rg {
 		grap.setFillColor((*this->index == m_id) ? sf::Color::Yellow : sf::Color::White);
 	}
 
-	Image::Image(std::string p_location, float x, float y, float zoom_x, float zoom_y) {
-		texture.loadFromFile(p_location);
+	Image::Image(ImageBuilder ib) {
+		texture.loadFromFile(ib.p_location);
 		sprite.setTexture(texture);
-		sprite.setScale(sf::Vector2f(zoom_x, zoom_y));
+		sprite.setScale(sf::Vector2f(ib.zoom_x, ib.zoom_y));
 		sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
-		sprite.setPosition(x, y);
+		sprite.setPosition(ib.x, ib.y);
 	}
 
 	void Image::draw(sf::RenderWindow& window) {

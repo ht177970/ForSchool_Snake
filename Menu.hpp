@@ -12,6 +12,20 @@ namespace rg {
 		START_GAME = 0,
 		SETTINGS = 1
 	};*/
+	struct ImageBuilder {
+		std::string p_location;
+		float x;
+		float y; 
+		float zoom_x; 
+		float zoom_y;
+		ImageBuilder(std::string p_location, float x, float y, float zoom_x, float zoom_y) {
+			this->p_location = p_location;
+			this->x = x;
+			this->y = y;
+			this->zoom_x = zoom_x;
+			this->zoom_y = zoom_y;
+		}
+	};
 
 	class Text : public BaseDrawable {
 	public:
@@ -29,7 +43,7 @@ namespace rg {
 
 	class Image : public BaseDrawable {
 	public:
-		explicit Image(std::string p_location, float x, float y, float zoom_x, float zoom_y);
+		explicit Image(ImageBuilder ib);
 		void draw(sf::RenderWindow& window) override;
 	private:
 		sf::Texture texture;
