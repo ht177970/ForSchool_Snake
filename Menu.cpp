@@ -23,6 +23,10 @@ namespace rg {
 		int x = 300, y = 300, next_y = 120;
 		sf::Font font;
 		font.loadFromFile("font.ttf");
+
+		m_renderManager->addGraphics(new Text(L"¡ô¡õ  ¿ï¾Ü", font, -1, nullptr, 50, 760, 20U));
+		m_renderManager->addGraphics(new Text(L"Enter½T»{", font, -1, nullptr, 50, 780, 20U));
+
 		for (int i = 0; i < 3; i++)
 			m_clickable_texts.push_back(new Text(texts[i], font, i, &m_text_index, x, y += next_y));
 		for (Text* t : m_clickable_texts)
