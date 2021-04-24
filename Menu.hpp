@@ -55,7 +55,7 @@ namespace rg {
 		explicit MainMenu(sf::RenderWindow& window, renderManager& render);
 		~MainMenu() = default;
 		void initMenu();
-		void loop();
+		void display();
 		void EnterPressed();
 	private:
 		int m_text_index;
@@ -69,7 +69,7 @@ namespace rg {
 		explicit GameOverMenu(sf::RenderWindow& window, renderManager& render);
 		~GameOverMenu() = default;
 		void initMenu(int score, int highest_score);
-		void loop();
+		void display();
 		void EnterPressed();
 	private:
 		int m_text_index;

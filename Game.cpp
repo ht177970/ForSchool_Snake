@@ -107,10 +107,6 @@ namespace rg {
 							elapsedGameTime += gameClock.restart().asSeconds();
 						pause = !pause;
 					}
-					if (e.key.code == sf::Keyboard::A)
-						m_game_snake->gainFood();
-					break;
-				default:
 					break;
 				}
 			}

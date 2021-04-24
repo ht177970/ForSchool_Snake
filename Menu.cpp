@@ -35,14 +35,14 @@ namespace rg {
 
 		m_renderManager->addGraphics(new Image(ImageBuilder("snake.png", 300, 200, 0.85f, 0.85f)));
 		
-		loop();
+		//display();
 	}
 
-	void MainMenu::loop() {
+	void MainMenu::display() {
 		sf::Event e;
 		/*sf::Clock clock;
 		float time_step = 0.1f;*/
-		while (window->isOpen() && Core::getNowMode() == Mode::MAIN_MENU) {
+		//while (window->isOpen() && Core::getNowMode() == Mode::MAIN_MENU) {
 			while(window->pollEvent(e))
 				switch (e.type) {
 				case sf::Event::Closed:
@@ -65,7 +65,7 @@ namespace rg {
 					break;
 				}
 			m_renderManager->Render();
-		}
+		//}
 	}
 
 	void MainMenu::EnterPressed() {
@@ -85,6 +85,7 @@ namespace rg {
 		this->window = &window;
 		this->m_renderManager = &render;
 		this->m_renderManager->clearAllGraphics();
+		m_text_index = -1;
 	}
 
 	void GameOverMenu::initMenu(int score, int highest_score) {
@@ -105,14 +106,14 @@ namespace rg {
 			m_renderManager->addGraphics(t);
 		m_text_index = 0;
 
-		loop();
+		//display();
 	}
 
-	void GameOverMenu::loop() {
+	void GameOverMenu::display() {
 		sf::Event e;
 		/*sf::Clock clock;
 		float time_step = 0.1f;*/
-		while (window->isOpen() && Core::getNowMode() == Mode::GAMEOVER) {
+		//while (window->isOpen() && Core::getNowMode() == Mode::GAMEOVER) {
 			while (window->pollEvent(e))
 				switch (e.type) {
 				case sf::Event::Closed:
@@ -135,7 +136,7 @@ namespace rg {
 					break;
 				}
 			m_renderManager->Render();
-		}
+		//}
 	}
 
 	void GameOverMenu::EnterPressed() {
@@ -158,14 +159,6 @@ namespace rg {
 		this->grap.setOrigin(grap.getLocalBounds().width / 2, grap.getLocalBounds().height / 2);
 		this->grap.setFillColor(text_color);
 		this->grap.setPosition(x, y);
-		/*switch (this->m_id) {
-		case 0:
-			this->grap.setPosition(200, 200);
-			break;
-		case 1:
-			this->grap.setPosition(200, 250);
-			break;
-		}*/
 		this->index = text_index;
 	}
 

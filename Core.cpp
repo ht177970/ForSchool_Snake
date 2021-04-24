@@ -1,6 +1,4 @@
 #include "Core.hpp"
-#include "Game.hpp"
-#include "Menu.hpp"
 
 #define MENU_WITDH 600
 #define MENU_HEIGHT 800
@@ -9,9 +7,11 @@ namespace rg {
 
 	//global
 	Mode Core::now_mode = Mode::MAIN_MENU;
+	bool Core::rebuild = true;
 
 	void Core::changeState(Mode new_mode) {
 		Core::now_mode = new_mode;
+		Core::rebuild = true;
 	}
 
 	Mode Core::getNowMode() {
@@ -30,19 +30,26 @@ namespace rg {
 
 	void Core::Run() {
 		Core::changeState(Mode::MAIN_MENU);
-		display();
+		while(window.isOpen())
+			display();
 	}
 
 	void Core::display() {
-		while (window.isOpen()) {
+		//while (window.isOpen()) {
 			switch (Core::getNowMode()) {
 			case Mode::MAIN_MENU: {
-				MainMenu menu(window, m_renderManager);
-				menu.initMenu();
+				if (Core::rebuild) {
+					Core::rebuild = false;
+					if (this->m_mainmenu)
+						delete this->m_mainmenu;
+					m_mainmenu = new MainMenu(window, m_renderManager);
+					m_mainmenu->initMenu();
+				}
+				m_mainmenu->display();
 				break;
 			}
 			case Mode::GAMING: {
-				Core::changeState(Mode::NONE);
+				//edit later
 				Game g(window, m_renderManager, BaseData(m_outgame_size, m_ingame_width, m_ingame_height, m_snake_size), 0.001f);
 				g.StartGame();
 				m_lastgame_score = g.getScore();
@@ -51,10 +58,16 @@ namespace rg {
 				break;
 			}
 			case Mode::GAMEOVER:
-				GameOverMenu gom(window, m_renderManager);
-				gom.initMenu(this->m_lastgame_score, this->m_highest_score);
+				if (Core::rebuild) {
+					Core::rebuild = false;
+					if (this->m_gameovermenu)
+						delete this->m_gameovermenu;
+					m_gameovermenu = new GameOverMenu(window, m_renderManager);
+					m_gameovermenu->initMenu(this->m_lastgame_score, this->m_highest_score);
+				}
+				m_gameovermenu->display();
 				break;
 			}
-		}
+		//}
 	}
 }
