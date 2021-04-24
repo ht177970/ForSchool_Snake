@@ -1,4 +1,5 @@
 #include "Game.hpp"
+#include "Core.hpp"
 #include <iostream>
 #include <cstring>
 
@@ -9,6 +10,11 @@ namespace rg {
 		this->m_ingame_width = data.ingame_width;
 		this->m_ingame_height = data.ingame_height;
 		this->m_snake_size = data.snake_size;
+		this->m_color = sf::Color::White;
+	}
+
+	void Wall::setColor(sf::Color new_color) {
+		m_color = new_color;
 	}
 
 	void Wall::draw(sf::RenderWindow& window) {
@@ -33,24 +39,24 @@ namespace rg {
 		for (int i : {0, col}) {
 			sf::Vertex line[] =
 			{
-				sf::Vertex(sf::Vector2f(m_outgame_size + m_snake_size * i, m_outgame_size)),
-				sf::Vertex(sf::Vector2f(m_outgame_size + m_snake_size * i, m_outgame_size + m_ingame_height))
+				sf::Vertex(sf::Vector2f(m_outgame_size + m_snake_size * i, m_outgame_size), m_color),
+				sf::Vertex(sf::Vector2f(m_outgame_size + m_snake_size * i, m_outgame_size + m_ingame_height), m_color)
 			};
 			window.draw(line, 2, sf::Lines);
 		}
 		for (int i : {0, row}) {
 			sf::Vertex line[] =
 			{
-				sf::Vertex(sf::Vector2f(m_outgame_size, m_outgame_size + m_snake_size * i)),
-				sf::Vertex(sf::Vector2f(m_outgame_size + m_ingame_width, m_outgame_size + m_snake_size * i))
+				sf::Vertex(sf::Vector2f(m_outgame_size, m_outgame_size + m_snake_size * i), m_color),
+				sf::Vertex(sf::Vector2f(m_outgame_size + m_ingame_width, m_outgame_size + m_snake_size * i), m_color)
 			};
 			window.draw(line, 2, sf::Lines);
 		}
 	}
 
 
-	Game::Game(sf::RenderWindow& _window, renderManager& render, BaseData data, float game_speed) :
-		/*m_renderManager(window),*/ m_wall(data) {
+	Game::Game(sf::RenderWindow& _window, renderManager& render, BaseData data, float game_speed) {// :
+		/*m_renderManager(window),*/ //m_wall(data) {
 		this->window = &_window;
 		this->m_renderManager = &render;
 		this->m_outgame_size = data.outgame_size;
@@ -67,9 +73,10 @@ namespace rg {
 
 		this->m_game_snake = new Snake(&m_outgame_size, &m_ingame_width, &m_ingame_height, m_snake_size);
 		this->m_game_food = new Food(m_outgame_size, m_ingame_width, m_ingame_height, m_snake_size);
+		this->m_wall = new Wall(data);
 
 		this->m_renderManager->clearAllGraphics();
-		this->m_renderManager->addGraphics(&this->m_wall);
+		this->m_renderManager->addGraphics(this->m_wall);
 		this->m_renderManager->addGraphics(this->m_game_food);
 		this->m_renderManager->addGraphics(this->m_game_snake);
 		this->m_renderManager->setSanke(m_game_snake);
@@ -113,9 +120,10 @@ namespace rg {
 				elapsedGameTime += gameClock.restart().asSeconds();
 				if (elapsedGameTime > timeStep)
 				{
-					elapsedGameTime = (static_cast<int>(elapsedGameTime * 100) % static_cast<int>(timeStep * 100)) / 100.0f;
+					//elapsedGameTime = (static_cast<int>(elapsedGameTime * 100) % static_cast<int>(timeStep * 100)) / 100.0f;
+					elapsedGameTime = 0.f;
 					if (!m_game_snake->move()) {
-						this->GameOver();
+						this->GameOverSnakeAnimation();
 						return;
 					}
 					if (this->isInFood()) {
@@ -146,13 +154,14 @@ namespace rg {
 		} while (m_game_snake->posInBody(m_game_food->getX(), m_game_food->getY()));
 	}
 	
-	void Game::GameOver() {
+	void Game::GameOverSnakeAnimation() {
+		const float flashing_interval = 0.2f;
+		const float delete_interval = 0.1f;
+
 		sf::Clock gameClock;
 		int _times = 0;
 		bool show = false; 
 		float time = 0.0f;
-		float flashing_interval = 0.2f;
-		float delete_interval = 0.1f;
 		sf::Event e;
 		while (window->isOpen()) {
 			while (window->pollEvent(e))
@@ -161,7 +170,7 @@ namespace rg {
 					return;
 				}
 			time += gameClock.restart().asSeconds();
-			if (_times < 5){
+			if (_times < 5){//flash 5 times
 				if (time > flashing_interval) {
 					time = 0.0f;
 					show = !show;
@@ -175,24 +184,30 @@ namespace rg {
 			}
 			m_renderManager->endGameRender(show);
 		}
-		this->GameOver_2();
+		this->GameOverFadeAnimation();
 	}
 
-	void Game::GameOver_2() {
+	void Game::GameOverFadeAnimation() {
 		sf::Event e;
-		sf::Clock clock;
-		float time_passed = 0.0f;
+		int fade_color = 255;
 		while (window->isOpen()) {
 			while (window->pollEvent(e))
 				if (e.type == sf::Event::Closed) {
 					window->close();
 					return;
 				}
-			time_passed += clock.restart().asSeconds();
-			if (time_passed > 2.0f)
-				return;
+
+			fade_color -= 2;
+			if (fade_color < 0)
+				fade_color = 0;
+			m_wall->setColor(sf::Color(fade_color, fade_color, fade_color));//White -> Black (255, 255, 255) -> (0, 0, 0)
+			m_game_food->setColor(sf::Color(fade_color, fade_color, 0));//Yellow -> Black (255, 255, 0) -> (0, 0, 0)
+
 			m_renderManager->endGameRender(false);
+			if (fade_color == 0)
+				break;
 		}
+		Core::changeState(Mode::GAMEOVER);
 	}
 
 	int Game::getScore() {

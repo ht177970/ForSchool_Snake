@@ -2,7 +2,7 @@
 #define SNAKE_RG_MENU_H_
 
 #include "WindowRender.hpp"
-#include <cstring>
+#include <sstream>
 #include <vector>
 #include <SFML/System/String.hpp>
 
@@ -29,7 +29,7 @@ namespace rg {
 
 	class Text : public BaseDrawable {
 	public:
-		explicit Text(sf::String text, sf::Font font, int code, int* text_index, float x, float y);
+		explicit Text(sf::String text, sf::Font font, int code, int* text_index, float x, float y, unsigned int size = 60U, sf::Color text_color = sf::Color::White);
 		~Text() = default;
 		int getId();
 		void draw(sf::RenderWindow& window) override;
@@ -50,11 +50,25 @@ namespace rg {
 		sf::Sprite sprite;
 	};
 
-	class Menu {
+	class MainMenu {
 	public:
-		explicit Menu(sf::RenderWindow& window, renderManager& render);
-		~Menu() = default;
+		explicit MainMenu(sf::RenderWindow& window, renderManager& render);
+		~MainMenu() = default;
 		void initMenu();
+		void loop();
+		void EnterPressed();
+	private:
+		int m_text_index;
+		sf::RenderWindow* window;
+		renderManager* m_renderManager;
+		std::vector<Text*> m_clickable_texts;
+	};
+
+	class GameOverMenu {
+	public:
+		explicit GameOverMenu(sf::RenderWindow& window, renderManager& render);
+		~GameOverMenu() = default;
+		void initMenu(int score, int highest_score);
 		void loop();
 		void EnterPressed();
 	private:

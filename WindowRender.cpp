@@ -16,7 +16,8 @@ namespace rg {
 
 	void renderManager::clearAllGraphics() {
 		for (auto grap : m_AllGraphics)
-			delete grap;
+			if(grap)
+				delete grap;
 		m_AllGraphics.clear();
 	}
 	

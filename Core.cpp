@@ -7,6 +7,7 @@
 
 namespace rg {
 
+	//global
 	Mode Core::now_mode = Mode::MAIN_MENU;
 
 	void Core::changeState(Mode new_mode) {
@@ -17,11 +18,17 @@ namespace rg {
 		return Core::now_mode;
 	}
 
+
+
+	//Core
 	Core::Core() : m_renderManager(window) {
 		window.create(sf::VideoMode(MENU_WITDH, MENU_HEIGHT), "MainMenu", sf::Style::Close | sf::Style::Titlebar);
+		window.setFramerateLimit(60);
+		this->m_lastgame_score = 0;
+		this->m_highest_score = 0;
 	}
 
-	void Core::Start() {
+	void Core::Run() {
 		Core::changeState(Mode::MAIN_MENU);
 		display();
 	}
@@ -30,14 +37,25 @@ namespace rg {
 		while (window.isOpen()) {
 			switch (Core::getNowMode()) {
 			case Mode::MAIN_MENU: {
-				Menu menu(window, m_renderManager);
+				MainMenu menu(window, m_renderManager);
 				menu.initMenu();
 				break;
 			}
-			case Mode::GAMING:
+			case Mode::GAMING: {
+				Core::changeState(Mode::NONE);
 				Game g(window, m_renderManager, BaseData(m_outgame_size, m_ingame_width, m_ingame_height, m_snake_size), 0.001f);
 				g.StartGame();
-				return;
+				m_lastgame_score = g.getScore();
+				if (m_lastgame_score > m_highest_score)
+					m_highest_score = m_lastgame_score;
+				break;
+			}
+			case Mode::GAMEOVER:
+				//system("pause");
+				//return;
+				GameOverMenu gom(window, m_renderManager);
+				gom.initMenu(this->m_lastgame_score, this->m_highest_score);
+				break;
 			}
 		}
 	}

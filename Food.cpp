@@ -48,6 +48,10 @@ namespace rg {
 		window.draw(grap);
 	}
 
+	void Food::setColor(sf::Color new_color) {
+		grap.setFillColor(new_color);
+	}
+
 	/*sf::RectangleShape Food::getDrawable() {
 		return grap;
 	}*/

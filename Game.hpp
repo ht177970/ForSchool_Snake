@@ -14,8 +14,10 @@ namespace rg {
 		explicit Wall(BaseData data);
 		~Wall() = default;
 		void draw(sf::RenderWindow& window) override;
+		void setColor(sf::Color new_color);
 	private:
 		int m_outgame_size, m_ingame_width, m_ingame_height, m_snake_size;
+		sf::Color m_color;
 	};
 
 	class Game {
@@ -24,13 +26,13 @@ namespace rg {
 		renderManager* m_renderManager;
 		Snake* m_game_snake;
 		Food* m_game_food;
-		Wall m_wall;
+		Wall* m_wall;
 		int m_outgame_size, m_ingame_width, m_ingame_height, m_snake_size;
 		int score;
 		float m_game_speed;
 		bool pause = false;
-		void GameOver();
-		void GameOver_2();
+		void GameOverSnakeAnimation();
+		void GameOverFadeAnimation();
 		void GameLoop();
 		bool isInFood();
 		void AteFood();
