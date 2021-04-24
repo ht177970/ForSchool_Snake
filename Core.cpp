@@ -51,8 +51,6 @@ namespace rg {
 				break;
 			}
 			case Mode::GAMEOVER:
-				//system("pause");
-				//return;
 				GameOverMenu gom(window, m_renderManager);
 				gom.initMenu(this->m_lastgame_score, this->m_highest_score);
 				break;
